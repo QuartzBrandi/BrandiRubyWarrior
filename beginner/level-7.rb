@@ -1,24 +1,40 @@
 
 class Player
 
+  MAX_HEALTH = 20
+
   def play_turn(warrior)
     @warrior = warrior
-    nil_health_check
-    nil_direction_check
+    nil_check
 
-    direction
-
-    action(@direction)
-
-    @health = @warrior.health
+    ground_covered?
+    change_direction
   end
 
-  def nil_health_check
-    @health = 20 if @health.nil?
-  end
-
-  def nil_direction_check
+  def nil_check
+    @health = MAX_HEALTH if @health.nil?
     @direction = :left if @direction.nil?
+    @left_covered = 0 if @left_covered.nil?
+    @right_covered = 0 if @right_covered.nil?
+    # may need to add a pivot :left here as well
+  end
+
+  def action
+    if taking_damage?
+      taking_damage_action
+    elsif @warrior.feel.stairs? && ground_covered?
+      @warrior.walk!
+    elsif @warrior.feel.empty? && @warrior.health < 20
+      @warrior.rest!
+    elsif @warrior.feel.enemy?
+      @warrior.attack!
+    elsif @warrior.feel.captive?
+      @warrior.rescue!
+    elsif @warrior.feel.empty?
+      @warrior.walk!
+    elsif @warrior.feel.wall?
+      @warrior.pivot!(:backward)
+    end
   end
 
   def taking_damage?
@@ -31,7 +47,7 @@ class Player
 
   def taking_damage_action
     if @warrior.feel.empty? && @health < 10
-      @warrior.walk!(@direction)
+      @warrior.walk!(:backward)
     elsif @warrior.feel.empty?
       @warrior.walk!
     elsif @warrior.feel.enemy?
@@ -39,46 +55,56 @@ class Player
     end
   end
 
-  def covered_the_rear?
-    if @rear_covered
-      true
-    elsif @warrior.feel(@direction).wall?
-      @rear_covered = true
-      true
-    elsif @warrior.feel(@direction).empty?
-      false
-    elsif @warrior.feel(@direction).captive?
-      false
-    elsif !@warrior.feel(@direction).enemy?
-      false
-    else
-      false
-    end
-  end
+  # def set_direction(direction)
+  #   @direction = direction
+  # end
 
-  def action(@direction)
-     if taking_damage?
-        taking_damage_action
-      elsif @warrior.feel(@direction).stairs?
-        @warrior.walk!(@direction)
-      elsif @warrior.feel(@direction).empty? && @warrior.health < 20
-        @warrior.rest!
-      elsif @warrior.feel(@direction).enemy?
-        @warrior.attack!(@direction)
-      elsif @warrior.feel(@direction).captive?
-        @warrior.rescue!(@direction)
-      elsif @warrior.feel(@direction).empty?
-        @warrior.walk!(@direction)
-      end
-  end
-
-  def direction
-    if !covered_the_rear? && (@direction == :right)
+  def change_direction
+    if @left_covered == 0 || @right_covered == 0
+      action
+    elsif @left_covered == -1 && @direction != :left
+      set_direction(:left)
       @warrior.pivot!(:left)
-      @direction = :left
-    elsif @warrior.feel(@direction).wall?
-    else
+    elsif @right_covered == -1 && @direction != :right
+      set_direction(:right)
       @warrior.pivot!(:right)
     end
   end
+
+  # TESTS AND ASSIGNS IF HERO REACHED A WALL
+  def ground_covered?
+    if @direction == :left
+      @left_covered = direction_covered?(@left_covered)
+    elsif @direction == :right
+      @right_covered = direction_covered?(@right_covered)
+    end
+
+    if (@left_covered == (1 || -1)) && (@right_covered == (1 || -1))
+      return true
+    else
+      return false
+    end
+  end
+
+  # RETURNS 1 FOR TRUE; 0 FOR FALSE; -1 FOR TRUE + STAIRS
+  def direction_covered?(direction_covered)
+    if direction_covered == 1
+      1  # true
+    elsif direction_covered == -1
+      -1  # true, but note the prescence of stairs
+    elsif @warrior.feel.wall?
+      1  # true
+    elsif @warrior.feel.stairs?
+      -1  # true, but note the presence of stairs
+    elsif @warrior.feel.empty?
+      0  # false
+    elsif @warrior.feel.captive?
+      0  # false
+    elsif @warrior.feel.enemy?
+      0  # false
+    else
+      0  # false
+    end
+  end
+
 end

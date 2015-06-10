@@ -55,18 +55,18 @@ class Player
   end
 
   def action(direction)
-     if taking_damage?
-        taking_damage_action
-      elsif @warrior.feel(direction).stairs?
-        @warrior.walk!(direction)
-      elsif @warrior.feel(direction).empty? && @warrior.health < 20
-        @warrior.rest!
-      elsif @warrior.feel(direction).enemy?
-        @warrior.attack!(direction)
-      elsif @warrior.feel(direction).captive?
-        @warrior.rescue!(direction)
-      elsif @warrior.feel(direction).empty?
-        @warrior.walk!(direction)
-      end
+    if taking_damage?
+      taking_damage_action
+    elsif @warrior.feel(direction).stairs?
+      @warrior.walk!(direction)
+    elsif @warrior.feel(direction).empty? && @warrior.health < 20
+      @warrior.rest!
+    elsif @warrior.feel(direction).enemy?
+      @warrior.attack!(direction)
+    elsif @warrior.feel(direction).captive?
+      @warrior.rescue!(direction)
+    elsif @warrior.feel(direction).empty?
+      @warrior.walk!(direction)
+    end
   end
 end
