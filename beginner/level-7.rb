@@ -9,13 +9,15 @@ class Player
 
     ground_covered?
     change_direction
+
+    @health = @warrior.health
   end
 
   def nil_check
-    @health = MAX_HEALTH if @health.nil?
-    @direction = :left if @direction.nil?
-    @left_covered = 0 if @left_covered.nil?
-    @right_covered = 0 if @right_covered.nil?
+    @health ||= MAX_HEALTH
+    @direction ||= :left
+    @left_covered ||= 0
+    @right_covered ||= 0
     # may need to add a pivot :left here as well
   end
 
@@ -24,7 +26,7 @@ class Player
       taking_damage_action
     elsif @warrior.feel.stairs? && ground_covered?
       @warrior.walk!
-    elsif @warrior.feel.empty? && @warrior.health < 20
+    elsif @warrior.feel.empty? && @warrior.health < MAX_HEALTH
       @warrior.rest!
     elsif @warrior.feel.enemy?
       @warrior.attack!
@@ -46,7 +48,7 @@ class Player
   end
 
   def taking_damage_action
-    if @warrior.feel.empty? && @health < 10
+    if @warrior.feel(:backward).empty? && @health < 10
       @warrior.walk!(:backward)
     elsif @warrior.feel.empty?
       @warrior.walk!
