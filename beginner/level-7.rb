@@ -7,8 +7,8 @@ class Player
     @warrior = warrior
     nil_check
 
-    ground_covered?
-    change_direction
+    check_direction
+    action_extended
 
     @health = @warrior.health
   end
@@ -57,11 +57,7 @@ class Player
     end
   end
 
-  # def set_direction(direction)
-  #   @direction = direction
-  # end
-
-  def change_direction
+  def action_extended
     if @left_covered == 0 || @right_covered == 0
       action
     elsif @left_covered == -1 && @direction != :left
@@ -73,15 +69,22 @@ class Player
     end
   end
 
-  # TESTS AND ASSIGNS IF HERO REACHED A WALL
-  def ground_covered?
+  def set_direction(direction)
+    @direction = direction
+  end
+
+  # TESTS IF HERO REACHED A WALL
+  def check_direction
     if @direction == :left
       @left_covered = direction_covered?(@left_covered)
     elsif @direction == :right
       @right_covered = direction_covered?(@right_covered)
     end
+  end
 
-    if (@left_covered == (1 || -1)) && (@right_covered == (1 || -1))
+  # TESTS IF ALL GROUND HAS BEEN COVERED
+  def ground_covered?
+    if (@left_covered == 1 || @left_covered == -1) && (@right_covered == 1 || @right_covered == -1)
       return true
     else
       return false
