@@ -32,7 +32,7 @@ class Player
       warrior.rest!
     elsif space.enemy?
       warrior.attack!
-    elsif far_off_enemy?
+    elsif far_off_enemy?(:backward)
       shoot_enemy
     elsif space.empty?
       warrior.walk!
@@ -74,15 +74,15 @@ class Player
   end
 
   # RETURNS AN ARRAY OF THREE SPACES
-  def look_ahead
-    looking_array = warrior.look
+  def look_ahead(direction)
+    looking_array = warrior.look(direction)
   end
 
   # CHECKS IF THERE IS AN ENEMY IN THE TWO SPACES PAST THE IMMEDIATE SPACE
-  def far_off_enemy?
-    if look_ahead[2].enemy?
+  def far_off_enemy?(direction)
+    if look_ahead(direction)[2].enemy?
       true
-    elsif look_ahead[1].enemy?
+    elsif look_ahead(direction)[1].enemy?
       true
     else
       false
