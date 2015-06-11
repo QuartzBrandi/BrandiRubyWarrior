@@ -1,4 +1,4 @@
-
+# TOTALLY UNORGANIZED CODE, YEAH!
 class Player
   attr_reader :warrior, :health
 
@@ -24,7 +24,9 @@ class Player
 
   # ALL THE ACTIONS YOU CAN TAKE
   def action
-    if taking_damage?
+    if
+      it_came_from_behind
+    elsif taking_damage?
       taking_damage_action
     elsif captive_in_front?
       rescue_captive_action
@@ -32,7 +34,7 @@ class Player
       warrior.rest!
     elsif space.enemy?
       warrior.attack!
-    elsif far_off_enemy?(:backward)
+    elsif far_off_enemy?(:forward)
       shoot_enemy
     elsif space.empty?
       warrior.walk!
@@ -89,17 +91,27 @@ class Player
     end
   end
 
+  def enemy_behind?
+    if far_off_enemy?(:backward)
+      true
+    elsif look_ahead(:backward)[0].enemy?
+      true
+    else
+      false
+    end
+  end
+
   def shoot_enemy
-    if look_ahead[2].enemy?
+    if look_ahead(:forward)[2].enemy?
       warrior.shoot!
-    elsif look_ahead[1].enemy?
+    elsif look_ahead(:forward)[1].enemy?
       warrior.shoot!
     end
   end
 
   # CHECKS IF THERE IS A CAPTIVE IN A SPECIFIC SPACE IN DIRECTION FACING
   def far_off_captive?(the_space)
-    if look_ahead[the_space].captive?
+    if look_ahead(:forward)[the_space].captive?
       true
     else
       false
@@ -127,6 +139,14 @@ class Player
       warrior.walk!
     elsif far_off_captive?(2)
       warrior.walk!
+    end
+  end
+
+  def it_came_from_behind
+    if space(:backward).enemy?
+      warrior.attack!(:backward)
+    elsif enemy_behind?
+      warrior.shoot!(:backward)
     end
   end
 
