@@ -7,9 +7,8 @@ class Player
     @warrior = warrior_obj
     @current_direction = :forward
 
-    # warrior.send(action, where_stairs)
-    action
-
+    action, direction = actions
+    warrior.send(action, direction)
   end
 
   def space(direction)
@@ -17,22 +16,22 @@ class Player
   end
 
   # RETURNS :forward :backward :left :right IN DIRECTION OF STAIRS
-  def where_stairs
+  def stairs
     warrior.direction_of_stairs
   end
 
-  # def action
-  #   hero_action = :walk!, direction
-  #   hero_action = :attack! if space(where_stairs).enemy?
-  #
-  #   return hero_action
-  # end
+  def actions
+    hero_action = [:walk!, stairs]
+    hero_action = [:attack!, direction_of_x(:enemy?)] if is_x_nearby?(:enemy?)
 
-  def action
-    if is_x_nearby?(:enemy?)
-      warrior.attack!(direction_of_x(:enemy?))
-    end
+    return hero_action
   end
+
+  # def action
+  #   if is_x_nearby?(:enemy?)
+  #     warrior.attack!(direction_of_x(:enemy?))
+  #   end
+  # end
 
   def is_x_nearby?(search_for) # NEEDS TO BE A SYMBOL AND A SPACE METHOD (empty? enemy? captive? etc.)
     occupied = false
