@@ -1,13 +1,20 @@
 class Player
-  attr_reader :warrior
+  attr_reader :warrior, :starting_health, :ending_health
 
   DIRECTIONS = [:forward, :backward, :left, :right]
+  MAX_HEALTH = 20
+
+  def initialize
+    @health = 20
+  end
 
   def play_turn(warrior_obj)
     @warrior = warrior_obj
+    @starting_health = warrior.health
 
-    action, direction = actions
-    warrior.send(action, direction)
+    action
+
+    @ending_health = warrior.health
   end
 
   # RETURNS A 'SPACE' OBJECT IN SPECIFIED DIRECTION
@@ -23,9 +30,21 @@ class Player
   # RETURNS AN ACTION AMONG ALL THE ACTIONS WARRIOR CAN (/SHOULD) TAKE
   def actions
     action = [:walk!, stairs]
+    action = [:rest!] if starting_health < MAX_HEALTH
     action = [:attack!, direction_of_x(:enemy?)] if is_x_nearby?(:enemy?)
 
     return action
+  end
+
+  # CHECKS TO SEE IF ACTION REQUIRES ARGUMENTS & PERFORMS THE ACTION
+  def action
+    warrior_action, direction = actions
+
+    if direction.nil?
+      warrior.send(warrior_action)
+    else
+      warrior.send(warrior_action, direction)
+    end
   end
 
   # RETURNS TRUE OR FALSE IF OBJECT SPECIFIED IS ONCE SPACE AWAY
